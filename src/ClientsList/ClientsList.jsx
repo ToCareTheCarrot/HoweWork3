@@ -1,5 +1,6 @@
 import React from "react";
 import { AddForm } from "./AddForm";
+import { EditForm } from "./EditForm";
 
 function addClient (
   clients,
@@ -8,20 +9,73 @@ function addClient (
   return [...clients, clientToAdd];
 }
 
+function deleteClient (
+  clients,
+  clientId
+){
+  const copyClients = [...clients];
+  const clientIndex = copyClients.map(client => client.id).indexOf(clientId);
+  copyClients.splice(clientIndex,1);
+  return copyClients;
+}
+
+function updateClient (
+  clients,
+  id,
+  fieldToUpdate,
+){
+  const clientIndex = clients.findIndex(client => client.id === id);
+  const clientToUpdate = clients[clientIndex];
+  const clientCopy = {...clientToUpdate, ...fieldToUpdate};
+
+  return [
+    ...clients.slice(0, clientIndex),
+    clientCopy,
+    ...clients.slice(clientIndex + 1)
+  ];
+}
+
 export class ClientsList extends React.Component {
   state = {
-    clients: [
-      {
-        id : "",
-        name: "",
-        phone: "",
-      }
-    ],
+    clients: [],
+
+    clientToEdit: null
   };
 
   nextId = 1;
 
   render(){
+    if (this.state.clientToEdit){
+      return(
+        <>
+          <EditForm
+            clientName = {
+              this.state.clients.find(client => client.id === this.state.clientToEdit).name
+            }
+
+            clientPhone = {
+              this.state.clients.find(client => client.id === this.state.clientToEdit).phone
+            }
+
+            onSave = {(name, phone) => {
+              const copy = updateClient(this.state.clients, this.state.clientToEdit, {name, phone});
+
+              this.setState({
+                clients: copy,
+                clientToEdit: null
+              });
+            }}  
+
+            onCancel = {() =>
+              this.setState({
+                clientToEdit: null
+              })
+            }
+          />
+        </>
+      );
+    }
+
     return(
       <>
         <AddForm
@@ -46,11 +100,28 @@ export class ClientsList extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {this.state.clients.map(client => (
+            {this.state.clients.map((client,index) => (
               <tr key={client.id}>
-                <td>{client.id}</td>
+                <td>{index+1}</td>
                 <td>{client.name}</td>
                 <td>{client.phone}</td>
+                <button onClick={() => {
+                  this.setState({
+                    clients: deleteClient(this.state.clients, client.id)
+                  });
+                }
+                }>
+                  Delete
+                </button>
+                <button
+                  onClick={() => 
+                    this.setState({
+                      clientToEdit: client.id
+                    })
+                  }
+                >
+                  Edit
+                </button>
               </tr>
             ))}
           </tbody>
