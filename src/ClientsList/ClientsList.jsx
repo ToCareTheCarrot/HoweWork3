@@ -26,7 +26,8 @@ function updateClient (
 ){
   const clientIndex = clients.findIndex(client => client.id === id);
   const clientToUpdate = clients[clientIndex];
-  const clientCopy = {...clientToUpdate, ...fieldToUpdate};
+  const clientCopy = {...clientToUpdate, ...fieldToUpdate};//так и не понял почему это работает?почему оно именно заменяет нужные поля?
+  //это же оператор spread,он раскладывает объект на отдельные поля и вкопирывает в наш объект в state, а получается, что не добавляет, а именно заменяет
 
   return [
     ...clients.slice(0, clientIndex),
